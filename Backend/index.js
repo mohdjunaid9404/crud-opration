@@ -9,7 +9,7 @@ const db = mysql.createConnection({
     host:"localhost",
     user: "root", 
     password: "password",
-    database: "books"
+    database: "test"
 })
 db.connect(function(err){
     if(err) throw err;
@@ -20,29 +20,58 @@ app.use(express.json())
 app.use(cors())
 
 
-app.get("/", (req,res)=>{
-    res.json("I m back on nodejs");
-    // console.log("I m back on nodejs");
-})
+// app.get("/", (req,res)=>{
+//     res.json("I m back on nodejs");
+//     // console.log("I m back on nodejs");
+// })
 
-app.get("/collection", (req,res)=>{
-    const q = "Select * from collection";
+app.get("/", (req,res)=>{
+    const q = "Select * from books";
     db.query(q, (err,data)=>{
         if(err) return res.json(err)
         return res.json(data)
     })
 })
 
-app.post("/collection", (req,res)=>{
-    const q = "INSERT INTO collection (`name`, `address`) VALUES (?)"
+app.post("/books", (req,res)=>{
+    const q = "INSERT INTO books (`title`, `description`, `price`, `cover`) VALUES (?)"
     const values = [
-    req.body.name,
-    req.body.address
+    req.body.title,
+    req.body.description,
+    req.body.price,
+    req.body.cover,
 ]
     db.query(q,[values], (err,data)=>{
         if(err) return res.json(err)
         return res.json("successfully created")
     })
+})
+
+app.delete("/delete/:id", (req,res)=>{
+    const bookId = req.params.id;
+    const q = "DELETE FROM books WHERE id = ?";
+
+    db.query(q,[bookId], (err,result)=>{
+        if(err) return res.json(err)
+        return res.json("successfully deleted");
+    } )
+})
+
+app.put("/update/:id", (req,res)=>{
+    const bookId = req.params.id;
+    const q = "UPDATE books SET `title`= ?, `description`= ?, `price`= ?, `cover`= ?, WHERE id = ?";
+   
+    const values = [
+    req.body.title,
+    req.body.description,
+    req.body.price,
+    req.body.cover,
+    ]
+
+    db.query(q,[...values,bookId], (err,result)=>{
+        if(err) return res.json(err)
+        return res.json("successfully updated");
+    } )
 })
 
 
